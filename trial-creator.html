@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Trial Manager</title>
+    <style>
+	body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 20px; }
+	form { margin-bottom: 20px; display: center; flex-direction: column; gap: 10px; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); }
+	.container { display: grid; grid-template-columns: 400px 400px; }
+	.trial { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+	button { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+   <div class = "card">
+    <h2>Create a Clinical Trial</h2>
+    <form id="trialForm">
+        <label>Trial Name:</label>
+        <input type="text" id="trialName" required><br><br>
+
+      <div class="container">
+	<div>
+        <label>Allowable Primary Treatment:</label><br>
+        <input type="checkbox" name="primTrt" value="No treatment of primary">No treatment of primary<br>
+        <input type="checkbox" name="primTrt" value="RP">RP<br>
+        <input type="checkbox" name="primTrt" value="Primary RT">Primary RT<br>
+        <input type="checkbox" name="primTrt" value="Neo-Adj ADT">Neo/Adj ADT<br>
+        <br>
+	</div>
+
+	<div>
+        <label>Allowable forms of Castration:</label><br>
+        <input type="checkbox" name="castrate" value="NoCastrate">No castration<br>
+        <input type="checkbox" name="castrate" value="ADT">ADT<br>
+        <input type="checkbox" name="castrate" value="Orchiectomy">Orchiectomy<br>
+        <br>
+	</div>
+
+	<div>
+        <label>Allowable Systemic Therapies:</label><br>
+        <input type="checkbox" name="priorSysTher" value="Arsi1">Enza<br>
+        <input type="checkbox" name="priorSysTher" value="Arsi2">Abi<br>
+        <input type="checkbox" name="priorSysTher" value="Arsi3">Daro<br>
+        <input type="checkbox" name="priorSysTher" value="Docetaxel">Docetaxel<br>
+        <input type="checkbox" name="priorSysTher" value="Cabazitaxel">Cabazitaxel<br>
+        <input type="checkbox" name="priorSysTher" value="Pluvicto">Pluvicto<br>
+        <input type="checkbox" name="priorSysTher" value="Olaparib">Olaparib<br>
+        <br>
+	</div>
+
+	<div>
+        <label>Prohibited Systemic Therapies:</label><br>
+        <input type="checkbox" name="prohibTrt" value="Arsi1">Enza<br>
+        <input type="checkbox" name="prohibTrt" value="Arsi2">Abi<br>
+        <input type="checkbox" name="prohibTrt" value="Arsi3">Daro<br>
+        <input type="checkbox" name="prohibTrt" value="Docetaxel">Docetaxel<br>
+        <input type="checkbox" name="prohibTrt" value="Cabazitaxel">Cabazitaxel<br>
+        <input type="checkbox" name="prohibTrt" value="Pluvicto">Pluvicto<br>
+        <input type="checkbox" name="prohibTrt" value="Olaparib">Olaparib<br>
+        <br>
+	</div>
+      </div>
+
+        <button type="submit">Add Trial</button>
+    </form>
+
+    <h2>Saved Clinical Trials</h2>
+    <div id="trialsList"></div>
+  </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            loadTrials();
+
+            document.getElementById("trialForm").addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const name = document.getElementById("trialName").value.trim();
+                const selectedPrimTrt = Array.from(document.querySelectorAll('input[name="primTrt"]:checked'))
+                                                .map(input => input.value);
+                const selectedCastrate = Array.from(document.querySelectorAll('input[name="castrate"]:checked'))
+                                                .map(input => input.value);
+                const selectedPriorSysTher = Array.from(document.querySelectorAll('input[name="priorSysTher"]:checked'))
+                                                .map(input => input.value);
+                const selectedProhibTher = Array.from(document.querySelectorAll('input[name="prohibTrt"]:checked'))
+                                                .map(input => input.value);
+
+
+                if (!name || selectedPrimTrt.length === 0 || selectedCastrate.length === 0) {
+                    alert("Please fill out all fields and select at least one primary treatment and castration option.");
+                    return;
+                }
+
+                const trial = { name, primTrt: selectedPrimTrt, castrate: selectedCastrate, priorSysTher: selectedPriorSysTher, prohibTrt: selectedProhibTher };
+                saveTrial(trial);
+                document.getElementById("trialForm").reset();
+            });
+        });
+
+        function saveTrial(trial) {
+            let trials = JSON.parse(localStorage.getItem("trials")) || [];
+            trials.push(trial);
+            localStorage.setItem("trials", JSON.stringify(trials));
+            loadTrials();
+        }
+
+        function loadTrials() {
+            const trialsList = document.getElementById("trialsList");
+            trialsList.innerHTML = "";
+
+            const trials = JSON.parse(localStorage.getItem("trials")) || [];
+            trials.forEach((trial, index) => {
+                const trialDiv = document.createElement("div");
+                trialDiv.className = "trial";
+                trialDiv.innerHTML = `
+                    <strong>${trial.name}</strong> <br>
+                    <em>Primary Treatment Details:</em> ${trial.primTrt.join(", ")} <br>
+                    <em>Castration Details:</em> ${trial.castrate.join(", ")} <br>
+                    <em>Allowable Treatments:</em> ${trial.priorSysTher.join(", ")} <br>
+                    <em>Prohibited Treatments:</em> ${trial.prohibTrt.join(", ")} <br>
+                    <button onclick="deleteTrial(${index})">Delete</button>
+                `;
+                trialsList.appendChild(trialDiv);
+            });
+        }
+
+        function deleteTrial(index) {
+            let trials = JSON.parse(localStorage.getItem("trials")) || [];
+            trials.splice(index, 1);
+            localStorage.setItem("trials", JSON.stringify(trials));
+            loadTrials();
+        }
+    </script>
+</body>
+</html>
