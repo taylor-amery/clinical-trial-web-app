@@ -31,7 +31,7 @@ Download the project HTML file.
 5. You can add any number of clinical trials
       - The list of trials in your portfolio are stored in localstorage on your own machine.
       - These data should be stored indefinitely across browser sessions unless site data is deleted from your browser
-      - PLEASE BE CAREFUL ABOUT DELETING SITE DATA FROM YOUR BROWSER IF YOU WISH TO RETAIN YOUR TRIAL LIST
+      - __PLEASE BE CAREFUL ABOUT DELETING SITE DATA FROM YOUR BROWSER IF YOU WISH TO RETAIN YOUR TRIAL LIST__
 6.  After completing your portfolio, you can then utilize the trial matching form by navigating to the main page and clicking Find a Clinical Trial
 7.  When finding a clinical trial, you must select all the appropriate options available on the form for most accurate results
 8.  After selecting all the appropriate options, click See Results to obtain all the clinical trial options for the individual with that treatment history
