@@ -15,13 +15,18 @@
 
     <h2>Manage Filtering Rules</h2>
 
+    <label for="trialSelect">Select Trial:</label>
+    <select id="trialSelect"></select>
+
     <label for="ruleType">Rule Type:</label>
     <select id="ruleType">
         <option value="include">Must Include</option>
         <option value="exclude">Must NOT Include</option>
     </select>
 
-    <input type="text" id="ruleInput" placeholder="Enter treatment">
+    <label for="treatmentSelect">Select Treatment:</label>
+    <select id="treatmentSelect"></select>
+
     <button class="button" onclick="addRule()">Add Rule</button>
 
     <h3>Saved Rules:</h3>
@@ -30,25 +35,35 @@
     <a href="find-trial.html">Go to Find a Trial</a>
 
     <script>
+        function loadTrialsAndTreatments() {
+            const trials = JSON.parse(localStorage.getItem("clinicalTrials")) || [];
+            const treatments = JSON.parse(localStorage.getItem("customTreatments")) || [];
+
+            const trialSelect = document.getElementById("trialSelect");
+            trialSelect.innerHTML = trials.map(t => `<option value="${t.name}">${t.name}</option>`).join("");
+
+            const treatmentSelect = document.getElementById("treatmentSelect");
+            treatmentSelect.innerHTML = treatments.map(t => `<option value="${t}">${t}</option>`).join("");
+        }
+
         function loadRules() {
             const rules = JSON.parse(localStorage.getItem("filterRules")) || [];
             const list = document.getElementById("ruleList");
             list.innerHTML = rules.map((r, index) => 
-                `<li>${r.type === 'include' ? '✅' : '❌'} ${r.treatment} 
+                `<li>${r.trial}: ${r.type === 'include' ? '✅' : '❌'} ${r.treatment} 
                 <button onclick="deleteRule(${index})">❌</button></li>`
             ).join("");
         }
 
         function addRule() {
+            const trial = document.getElementById("trialSelect").value;
             const type = document.getElementById("ruleType").value;
-            const input = document.getElementById("ruleInput");
+            const treatment = document.getElementById("treatmentSelect").value;
+
             let rules = JSON.parse(localStorage.getItem("filterRules")) || [];
-            if (input.value.trim()) {
-                rules.push({ type, treatment: input.value.trim() });
-                localStorage.setItem("filterRules", JSON.stringify(rules));
-                input.value = "";
-                loadRules();
-            }
+            rules.push({ trial, type, treatment });
+            localStorage.setItem("filterRules", JSON.stringify(rules));
+            loadRules();
         }
 
         function deleteRule(index) {
@@ -58,7 +73,10 @@
             loadRules();
         }
 
-        window.onload = loadRules;
+        window.onload = function() {
+            loadTrialsAndTreatments();
+            loadRules();
+        };
     </script>
 
 </body>
