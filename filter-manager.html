@@ -36,7 +36,7 @@
 
     <script>
         function loadTrialsAndTreatments() {
-            const trials = JSON.parse(localStorage.getItem("trials")) || [];
+            const trials = JSON.parse(localStorage.getItem("trial")) || [];
             const treatments = JSON.parse(localStorage.getItem("customTreatments")) || [];
 
             const trialSelect = document.getElementById("trialSelect");
