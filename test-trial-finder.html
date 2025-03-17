@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find a Trial</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+        .button { background-color: #007bff; color: white; padding: 10px; border: none; cursor: pointer; margin-top: 10px; }
+        .treatment { display: inline-block; padding: 8px; border: 1px solid #ccc; margin: 5px; cursor: pointer; border-radius: 5px; }
+        .selected { background-color: #007bff; color: white; }
+        ul { padding: 0; list-style: none; }
+        li { padding: 8px; border: 1px solid #ddd; margin-top: 5px; border-radius: 5px; background: #f8f8f8; }
+    </style>
+</head>
+<body>
+
+    <h2>Find a Clinical Trial</h2>
+
+    <h3>Select Prior Treatments</h3>
+    <div id="treatmentOptions"></div>
+
+    <button id="filterButton" class="button" onclick="filterTrials()">See Results</button>
+
+    <h3>Results:</h3>
+    <ul id="results"></ul>
+
+    <a href="manage-filters.html">Manage Filtering Rules</a>
+
+    <script>
+        let selectedTreatments = [];
+
+        function loadTreatments() {
+            const treatments = JSON.parse(localStorage.getItem("customTreatments")) || [];
+            const container = document.getElementById("treatmentOptions");
+            container.innerHTML = treatments.map(t => 
+                `<span class="treatment" data-value="${t}">${t}</span>`
+            ).join("");
+
+            document.querySelectorAll(".treatment").forEach(el => {
+                el.addEventListener("click", function() {
+                    const treatment = this.getAttribute("data-value");
+                    if (selectedTreatments.includes(treatment)) {
+                        selectedTreatments = selectedTreatments.filter(t => t !== treatment);
+                        this.classList.remove("selected");
+                    } else {
+                        selectedTreatments.push(treatment);
+                        this.classList.add("selected");
+                    }
+                });
+            });
+        }
+
+        function filterTrials() {
+            const rules = JSON.parse(localStorage.getItem("filterRules")) || [];
+            let results = "✅ Trial Matches!";
+
+            for (const rule of rules) {
+                if (rule.type === "include" && !selectedTreatments.includes(rule.treatment)) {
+                    results = `❌ Missing required treatment: ${rule.treatment}`;
+                    break;
+                }
+                if (rule.type === "exclude" && selectedTreatments.includes(rule.treatment)) {
+                    results = `❌ Should NOT include: ${rule.treatment}`;
+                    break;
+                }
+            }
+
+            document.getElementById("results").innerHTML = `<li>${results}</li>`;
+        }
+
+        window.onload = loadTreatments;
+    </script>
+
+</body>
+</html>

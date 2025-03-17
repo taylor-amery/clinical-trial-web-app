@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Treatments</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+        .button { background-color: #007bff; color: white; padding: 10px; border: none; cursor: pointer; margin-top: 10px; }
+        ul { padding: 0; list-style: none; }
+        li { padding: 8px; border: 1px solid #ddd; margin-top: 5px; border-radius: 5px; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+    <h2>Manage Treatments</h2>
+    
+    <input type="text" id="treatmentInput" placeholder="Enter treatment name">
+    <button class="button" onclick="addTreatment()">Add Treatment</button>
+    
+    <h3>Saved Treatments:</h3>
+    <ul id="treatmentList"></ul>
+    
+    <a href="find-trial.html">Go to Find a Trial</a>
+
+    <script>
+        function loadTreatments() {
+            const treatments = JSON.parse(localStorage.getItem("customTreatments")) || [];
+            const list = document.getElementById("treatmentList");
+            list.innerHTML = treatments.map((t, index) => 
+                `<li>${t} <button onclick="deleteTreatment(${index})">❌</button></li>`
+            ).join("");
+        }
+
+        function addTreatment() {
+            const input = document.getElementById("treatmentInput");
+            let treatments = JSON.parse(localStorage.getItem("customTreatments")) || [];
+            if (input.value.trim()) {
+                treatments.push(input.value.trim());
+                localStorage.setItem("customTreatments", JSON.stringify(treatments));
+                input.value = "";
+                loadTreatments();
+            }
+        }
+
+        function deleteTreatment(index) {
+            let treatments = JSON.parse(localStorage.getItem("customTreatments")) || [];
+            treatments.splice(index, 1);
+            localStorage.setItem("customTreatments", JSON.stringify(treatments));
+            loadTreatments();
+        }
+
+        window.onload = loadTreatments;
+    </script>
+
+</body>
+</html>
