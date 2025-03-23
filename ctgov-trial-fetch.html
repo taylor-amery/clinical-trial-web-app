@@ -33,7 +33,7 @@
             }
 
             try {
-                const response = await fetch(`/get_trial?nct=${nctNumber}`);
+                const response = await fetch(`https://clinical-trial-web-app.onrender.com/get_trial?nct=${nctNumber}`);
                 const data = await response.json();
                 document.getElementById("trialData").textContent = JSON.stringify(data, null, 2);
             } catch (error) {
