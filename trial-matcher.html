@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Trial Finder</title>
+    <title>Trial Matcher</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-        .card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); }        
-	.returnButton { color: #007bff; padding: 10px; border: none; cursor: pointer; width: 100%; margin-top: 10px; }
-        .resultButton { background-color: #007bff; color: white; padding: 10px; border: none; cursor: pointer; width: 100%; margin-top: 10px; }
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .button { background-color: #007bff; color: white; padding: 10px; border: none; cursor: pointer; margin-top: 10px; }
         .button:disabled { background-color: #ccc; cursor: not-allowed; }
         .treatment { display: inline-block; padding: 8px; border: 1px solid #ccc; margin: 5px; cursor: pointer; border-radius: 5px; }
         .selected { background-color: #007bff; color: white; }
@@ -17,89 +16,75 @@
     </style>
 </head>
 <body>
-
     <div class="card">
-      <a href="index.html" class="button">Return to Main Page</a>
-        <h2 align = center>Clinical Trial Finder</h2>
-
-        <h3 align = center style="color: red;">You must select ALL that apply</h3>
-        <div id="treatments">
-	<br>
-	    <h3> Treatment of Primary Lesion </h3> <!--create buttons to represent various treatments for primary prostate tumors-->
-            <span class="treatment" data-value="No treatment of primary">No treatment of primary</span>
-            <span class="treatment" data-value="RP">RP</span>
-            <span class="treatment" data-value="Primary RT">Primary RT</span>
-            <span class="treatment" data-value="Neo-Adj ADT">Neo/Adj ADT</span>
-	    <br>
-	    <h3> Androgen Deprivation? </h3> <!--create buttons to reflect if a person is medically/surgically castrated or not-->
-	    <span class="treatment" data-value="NoCastrate">No castration</span>
-            <span class="treatment" data-value="ADT">ADT</span>
-            <span class="treatment" data-value="Orchiectomy">Orchiectomy</span>
-	    <h3> Other Prior Systemic Therapy </h3> <!--create buttons for all other systemic therapies commonly used as SOC in prostate cancer-->
-            <span class="treatment" data-value="Arsi1">Enza</span>
-            <span class="treatment" data-value="Arsi2">Abi</span>
-            <span class="treatment" data-value="Arsi3">Daro</span>
-            <span class="treatment" data-value="Docetaxel">Docetaxel</span>
-            <span class="treatment" data-value="Cabazitaxel">Cabazitaxel</span>
-            <span class="treatment" data-value="Pluvicto">Pluvicto</span>
-            <span class="treatment" data-value="Olaparib">Olaparib</span>
-        </div>
-
-        <button id="filterButton" class="button" onclick="filterTrials()" >See Results</button> <!--button to search for matching trials-->
-
-        <ul id="results"></ul>
+        <h2 align="center">Trial Matcher</h2>
+        <h3>Select Prior Treatments</h3>
+        <div id="treatmentList"></div>
+        <button class="button" onclick="matchTrials()">Find Matching Trials</button>
     </div>
+    
+    <div class="card">
+        <h3>Matching Trials</h3>
+        <ul id="matchingTrials"></ul>
+    </div>
+    
+    <script>
+        let selectedTreatments = new Set();
+        let trials = JSON.parse(localStorage.getItem("trials")) || [];
 
-<!--the following script defines a static list of all the example trials (Trial A through Trial M) and their characteristics-->
-<!--Useful attributes identified for filtering: primary treatment type (primTrt), method of castration (castrate), all other systemic therapies (priorSysTher), and finally all prohibited prior therpaies (prohibTher)-->
-
-    <script> 
-
-	const trials = JSON.parse(localStorage.getItem("trials")) || [];
-
-        let selectedTreatments = [];
-
-<!--Below code defines functionality of clickable buttons in app-->
-        document.querySelectorAll(".treatment").forEach(el => {
-            el.addEventListener("click", function() {
-                const treatment = this.getAttribute("data-value");
-                if (selectedTreatments.includes(treatment)) {
-                    selectedTreatments = selectedTreatments.filter(t => t !== treatment);
-                    this.classList.remove("selected");
-                } else {
-                    selectedTreatments.push(treatment);
-                    this.classList.add("selected");
-                }
+        function updateTreatmentList() {
+            let treatments = new Set();
+            trials.forEach(trial => trial.treatments.forEach(t => treatments.add(t)));
+            
+            const treatmentList = document.getElementById("treatmentList");
+            treatmentList.innerHTML = "";
+            treatments.forEach(treatment => {
+                let span = document.createElement("span");
+                span.className = "treatment";
+                span.innerText = treatment;
+                span.onclick = () => {
+                    if (selectedTreatments.has(treatment)) {
+                        selectedTreatments.delete(treatment);
+                        span.classList.remove("selected");
+                    } else {
+                        selectedTreatments.add(treatment);
+                        span.classList.add("selected");
+                    }
+                };
+                treatmentList.appendChild(span);
             });
-        });
-
-<!--function that filters down to list of trials that matches the selected input-->
-<!--The below code needs the most tweaking for proper filtering/matching. If the right filtering result is for some reason not possible through the filter function below, possible solutions may exist by creatively tweaking the trial attributes themselves-->
-        function filterTrials() {
-            const resultsList = document.getElementById("results");
-
-            const filtered = trials.filter(trial =>
-		trial.primTrt.some(t => selectedTreatments.includes(t)) &&
-                trial.castrate.some(t => selectedTreatments.includes(t)) &&
-		(trial.priorSysTher.every(t => selectedTreatments.includes(t) && trial.id !== 7) || 
-			(trial.id === 7 && trial.priorSysTher.some(t => selectedTreatments.includes(t)) && trial.priorSysTher.filter(t => 				selectedTreatments.includes(t)).length === 1) ||
-			(trial.id === 8 && trial.priorSysTher.some(t => selectedTreatments.includes(t)) && trial.priorSysTher.filter(t => 				selectedTreatments.includes(t)).length >= 2) ||
-			(trial.id === 9 && trial.priorSysTher.some(t => selectedTreatments.includes(t)) && selectedTreatments.find(t => 				t.includes("taxel")) && selectedTreatments.filter(t => t.includes("Arsi")).length <= 2) ||
-			(trial.id === 10 && trial.priorSysTher.some(t => selectedTreatments.includes(t)) && selectedTreatments.filter(t => 				t.includes("Arsi")).length >= 1) || 
-			(trial.id === 11 && trial.priorSysTher.some(t => selectedTreatments.includes(t)) && selectedTreatments.filter(t => 				t.includes("Arsi")).length >= 1) ||
-			(trial.id === 12 && trial.priorSysTher.some(t => selectedTreatments.includes(t)) && selectedTreatments.find(t => 				t.includes("Pluvicto"))) || 
-			(trial.id === 13 && trial.priorSysTher.some(t => selectedTreatments.includes(t)) && selectedTreatments.find(t => 				t.includes("taxel")) && selectedTreatments.find(t => t.includes("Pluvicto")) && selectedTreatments.filter(t => 					t.includes("Arsi")).length === 1)) && 
-                !trial.prohibTrt.some(t => selectedTreatments.includes(t))
-            );
-
-<!--Display list of matching trials obtained by filtering function above-->
-            resultsList.innerHTML = filtered.length
-                ? filtered.map(trial => `<li>${trial.name}</li>`).join("")
-                : "<li>No matching trials found.</li>";
         }
 
+        function matchTrials() {
+            const matchingList = document.getElementById("matchingTrials");
+            matchingList.innerHTML = "";
+            
+            trials.forEach(trial => {
+                let matches = trial.rules.every(rule => {
+                    let selected = Array.from(selectedTreatments);
+                    let ruleTreatments = rule.treatments;
+                    
+                    if (rule.type === "must") {
+                        return ruleTreatments.every(t => selected.includes(t));
+                    } else if (rule.type === "must-not") {
+                        return ruleTreatments.every(t => !selected.includes(t));
+                    } else if (rule.type === "at-least-one") {
+                        return ruleTreatments.some(t => selected.includes(t));
+                    } else if (rule.type === "at-most-one") {
+                        return ruleTreatments.filter(t => selected.includes(t)).length <= 1;
+                    }
+                    return false;
+                });
+                
+                if (matches) {
+                    let li = document.createElement("li");
+                    li.innerText = trial.name + ": " + trial.description;
+                    matchingList.appendChild(li);
+                }
+            });
+        }
 
+        updateTreatmentList();
     </script>
-
 </body>
 </html>
