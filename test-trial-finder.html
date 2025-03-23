@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find a Trial</title>
+    <title>Trial Matcher</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .button { background-color: #007bff; color: white; padding: 10px; border: none; cursor: pointer; margin-top: 10px; }
+        .button:disabled { background-color: #ccc; cursor: not-allowed; }
         .treatment { display: inline-block; padding: 8px; border: 1px solid #ccc; margin: 5px; cursor: pointer; border-radius: 5px; }
         .selected { background-color: #007bff; color: white; }
         ul { padding: 0; list-style: none; }
@@ -14,63 +16,75 @@
     </style>
 </head>
 <body>
-
-    <h2>Find a Clinical Trial</h2>
-
-    <h3>Select Prior Treatments</h3>
-    <div id="treatmentOptions"></div>
-
-    <button id="filterButton" class="button" onclick="filterTrials()">See Results</button>
-
-    <h3>Results:</h3>
-    <ul id="results"></ul>
-
-    <a href="manage-filters.html">Manage Filtering Rules</a>
-
+    <div class="card">
+        <h2 align="center">Trial Matcher</h2>
+        <h3>Select Prior Treatments</h3>
+        <div id="treatmentList"></div>
+        <button class="button" onclick="matchTrials()">Find Matching Trials</button>
+    </div>
+    
+    <div class="card">
+        <h3>Matching Trials</h3>
+        <ul id="matchingTrials"></ul>
+    </div>
+    
     <script>
-        let selectedTreatments = [];
+        let selectedTreatments = new Set();
+        let trials = JSON.parse(localStorage.getItem("trials")) || [];
 
-        function loadTreatments() {
-            const treatments = JSON.parse(localStorage.getItem("customTreatments")) || [];
-            const container = document.getElementById("treatmentOptions");
-            container.innerHTML = treatments.map(t => 
-                `<span class="treatment" data-value="${t}">${t}</span>`
-            ).join("");
-
-            document.querySelectorAll(".treatment").forEach(el => {
-                el.addEventListener("click", function() {
-                    const treatment = this.getAttribute("data-value");
-                    if (selectedTreatments.includes(treatment)) {
-                        selectedTreatments = selectedTreatments.filter(t => t !== treatment);
-                        this.classList.remove("selected");
+        function updateTreatmentList() {
+            let treatments = new Set();
+            trials.forEach(trial => trial.treatments.forEach(t => treatments.add(t)));
+            
+            const treatmentList = document.getElementById("treatmentList");
+            treatmentList.innerHTML = "";
+            treatments.forEach(treatment => {
+                let span = document.createElement("span");
+                span.className = "treatment";
+                span.innerText = treatment;
+                span.onclick = () => {
+                    if (selectedTreatments.has(treatment)) {
+                        selectedTreatments.delete(treatment);
+                        span.classList.remove("selected");
                     } else {
-                        selectedTreatments.push(treatment);
-                        this.classList.add("selected");
+                        selectedTreatments.add(treatment);
+                        span.classList.add("selected");
                     }
-                });
+                };
+                treatmentList.appendChild(span);
             });
         }
 
-        function filterTrials() {
-            const rules = JSON.parse(localStorage.getItem("filterRules")) || [];
-            let results = "✅ Trial Matches!";
-
-            for (const rule of rules) {
-                if (rule.type === "include" && !selectedTreatments.includes(rule.treatment)) {
-                    results = `❌ Missing required treatment: ${rule.treatment}`;
-                    break;
+        function matchTrials() {
+            const matchingList = document.getElementById("matchingTrials");
+            matchingList.innerHTML = "";
+            
+            trials.forEach(trial => {
+                let matches = trial.rules.every(rule => {
+                    let selected = Array.from(selectedTreatments);
+                    let ruleTreatments = rule.treatments;
+                    
+                    if (rule.type === "must") {
+                        return ruleTreatments.every(t => selected.includes(t));
+                    } else if (rule.type === "must-not") {
+                        return ruleTreatments.every(t => !selected.includes(t));
+                    } else if (rule.type === "at-least-one") {
+                        return ruleTreatments.some(t => selected.includes(t));
+                    } else if (rule.type === "at-most-one") {
+                        return ruleTreatments.filter(t => selected.includes(t)).length <= 1;
+                    }
+                    return false;
+                });
+                
+                if (matches) {
+                    let li = document.createElement("li");
+                    li.innerText = trial.name + ": " + trial.description;
+                    matchingList.appendChild(li);
                 }
-                if (rule.type === "exclude" && selectedTreatments.includes(rule.treatment)) {
-                    results = `❌ Should NOT include: ${rule.treatment}`;
-                    break;
-                }
-            }
-
-            document.getElementById("results").innerHTML = `<li>${results}</li>`;
+            });
         }
 
-        window.onload = loadTreatments;
+        updateTreatmentList();
     </script>
-
 </body>
 </html>
