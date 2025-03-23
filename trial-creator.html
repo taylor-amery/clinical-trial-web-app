@@ -3,138 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Trial Manager</title>
+    <title>Trial Creator</title>
     <style>
-	body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 20px; }
-	form { margin-bottom: 20px; display: center; flex-direction: column; gap: 10px; }
-        .card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); }
-        .button { color: #007bff; padding: 10px; border: none; cursor: pointer; width: 12%; margin-top: 15px; position: absolute; left: 625px;}
-	.container { display: grid; grid-template-columns: 400px 400px; }
-	.trial { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
-	button { cursor: pointer; }
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .button { background-color: #007bff; color: white; padding: 10px; border: none; cursor: pointer; margin-top: 10px; }
+        .button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .treatment, .rule { display: inline-block; padding: 8px; border: 1px solid #ccc; margin: 5px; cursor: pointer; border-radius: 5px; }
+        .selected { background-color: #007bff; color: white; }
+        ul { padding: 0; list-style: none; }
+        li { padding: 8px; border: 1px solid #ddd; margin-top: 5px; border-radius: 5px; background: #f8f8f8; }
+        .input-group { margin-bottom: 10px; }
+        label { font-weight: bold; }
     </style>
 </head>
 <body>
-
-   <div class = "card">
-     <a href="index.html" class="button">Return to Main Page</a>
-      <h2>Create a Clinical Trial</h2>
-      <form id="trialForm">
-          <label>Trial Name:</label>
-          <input type="text" id="trialName" required><br><br>
-
-        <div class="container">
-	  <div>
-          <label>Allowable Primary Treatment:</label><br>
-          <input type="checkbox" name="primTrt" value="No treatment of primary">No treatment of primary<br>
-          <input type="checkbox" name="primTrt" value="RP">RP<br>
-          <input type="checkbox" name="primTrt" value="Primary RT">Primary RT<br>
-          <input type="checkbox" name="primTrt" value="Neo-Adj ADT">Neo/Adj ADT<br>
-          <br>
-	  </div>
-
-	  <div>
-          <label>Allowable forms of Castration:</label><br>
-          <input type="checkbox" name="castrate" value="NoCastrate">No castration<br>
-          <input type="checkbox" name="castrate" value="ADT">ADT<br>
-          <input type="checkbox" name="castrate" value="Orchiectomy">Orchiectomy<br>
-          <br>
-	  </div>
-
-	  <div>
-          <label>Allowable Systemic Therapies:</label><br>
-          <input type="checkbox" name="priorSysTher" value="Arsi1">Enza<br>
-          <input type="checkbox" name="priorSysTher" value="Arsi2">Abi<br>
-          <input type="checkbox" name="priorSysTher" value="Arsi3">Daro<br>
-          <input type="checkbox" name="priorSysTher" value="Docetaxel">Docetaxel<br>
-          <input type="checkbox" name="priorSysTher" value="Cabazitaxel">Cabazitaxel<br>
-          <input type="checkbox" name="priorSysTher" value="Pluvicto">Pluvicto<br>
-          <input type="checkbox" name="priorSysTher" value="Olaparib">Olaparib<br>
-          <br>
-	  </div>
-
-	  <div>
-          <label>Prohibited Systemic Therapies:</label><br>
-          <input type="checkbox" name="prohibTrt" value="Arsi1">Enza<br>
-          <input type="checkbox" name="prohibTrt" value="Arsi2">Abi<br>
-          <input type="checkbox" name="prohibTrt" value="Arsi3">Daro<br>
-          <input type="checkbox" name="prohibTrt" value="Docetaxel">Docetaxel<br>
-          <input type="checkbox" name="prohibTrt" value="Cabazitaxel">Cabazitaxel<br>
-          <input type="checkbox" name="prohibTrt" value="Pluvicto">Pluvicto<br>
-          <input type="checkbox" name="prohibTrt" value="Olaparib">Olaparib<br>
-          <br>
-	  </div>
+    <div class="card">
+        <h2 align="center">Trial Creator</h2>
+        <div class="input-group">
+            <label for="trialName">Trial Name:</label>
+            <input type="text" id="trialName">
         </div>
-
-          <button type="submit">Add Trial</button>
-      </form>
-
-    <h2>Saved Clinical Trials</h2>
-    <div id="trialsList"></div>
-  </div>
-
+        <div class="input-group">
+            <label for="trialDescription">Description:</label>
+            <textarea id="trialDescription" rows="3"></textarea>
+        </div>
+        
+        <h3>Select Treatments</h3>
+        <div id="treatmentList"></div>
+        <input type="text" id="newTreatment" placeholder="Add new treatment">
+        <button class="button" onclick="addTreatment()">Add Treatment</button>
+        
+        <h3>Define Filter Rules</h3>
+        <div id="ruleList"></div>
+        <button class="button" onclick="addRule()">Add Rule</button>
+        
+        <button class="button" onclick="saveTrial()">Save Trial</button>
+    </div>
+    
+    <div class="card">
+        <h3>Saved Trials</h3>
+        <ul id="savedTrials"></ul>
+    </div>
+    
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            loadTrials();
+        let treatments = [];
 
-            document.getElementById("trialForm").addEventListener("submit", function (e) {
-                e.preventDefault();
+        function addTreatment() {
+            const treatmentInput = document.getElementById("newTreatment").value.trim();
+            if (treatmentInput && !treatments.includes(treatmentInput)) {
+                treatments.push(treatmentInput);
+                updateTreatmentList();
+                document.getElementById("newTreatment").value = "";
+            }
+        }
 
-                const name = document.getElementById("trialName").value.trim();
-                const selectedPrimTrt = Array.from(document.querySelectorAll('input[name="primTrt"]:checked'))
-                                                .map(input => input.value);
-                const selectedCastrate = Array.from(document.querySelectorAll('input[name="castrate"]:checked'))
-                                                .map(input => input.value);
-                const selectedPriorSysTher = Array.from(document.querySelectorAll('input[name="priorSysTher"]:checked'))
-                                                .map(input => input.value);
-                const selectedProhibTher = Array.from(document.querySelectorAll('input[name="prohibTrt"]:checked'))
-                                                .map(input => input.value);
+        function updateTreatmentList() {
+            const treatmentList = document.getElementById("treatmentList");
+            treatmentList.innerHTML = treatments.map(t => `<span class="treatment">${t}</span>`).join(" ");
+        }
+        
+        function addRule() {
+            const ruleDiv = document.createElement("div");
+            ruleDiv.className = "rule";
+            
+            const ruleSelect = document.createElement("select");
+            ruleSelect.innerHTML = `
+                <option value="must">MUST include</option>
+                <option value="must-not">MUST NOT include</option>
+                <option value="at-least-one">AT LEAST ONE OF</option>
+                <option value="at-most-one">AT MOST ONE OF</option>
+            `;
+            
+            const treatmentSelect = document.createElement("select");
+            treatmentSelect.multiple = true;
+            treatmentSelect.innerHTML = treatments.map(t => `<option value="${t}">${t}</option>`).join(" ");
+            
+            ruleDiv.appendChild(ruleSelect);
+            ruleDiv.appendChild(treatmentSelect);
+            document.getElementById("ruleList").appendChild(ruleDiv);
+        }
 
-
-                if (!name || selectedPrimTrt.length === 0 || selectedCastrate.length === 0) {
-                    alert("Please fill out all fields and select at least one primary treatment and castration option.");
-                    return;
-                }
-
-                const trial = { name, primTrt: selectedPrimTrt, castrate: selectedCastrate, priorSysTher: selectedPriorSysTher, prohibTrt: selectedProhibTher };
-                saveTrial(trial);
-                document.getElementById("trialForm").reset();
+        function saveTrial() {
+            const trialName = document.getElementById("trialName").value.trim();
+            const trialDescription = document.getElementById("trialDescription").value.trim();
+            if (!trialName) return alert("Trial name is required");
+            
+            const rules = Array.from(document.querySelectorAll(".rule")).map(rule => {
+                return {
+                    type: rule.children[0].value,
+                    treatments: Array.from(rule.children[1].selectedOptions).map(option => option.value)
+                };
             });
-        });
-
-        function saveTrial(trial) {
+            
+            const trial = {
+                name: trialName,
+                description: trialDescription,
+                treatments: treatments,
+                rules: rules
+            };
+            
             let trials = JSON.parse(localStorage.getItem("trials")) || [];
             trials.push(trial);
             localStorage.setItem("trials", JSON.stringify(trials));
-            loadTrials();
+            displayTrials();
         }
-
-        function loadTrials() {
-            const trialsList = document.getElementById("trialsList");
-            trialsList.innerHTML = "";
-
-            const trials = JSON.parse(localStorage.getItem("trials")) || [];
-            trials.forEach((trial, index) => {
-                const trialDiv = document.createElement("div");
-                trialDiv.className = "trial";
-                trialDiv.innerHTML = `
-                    <strong>${trial.name}</strong> <br>
-                    <em>Primary Treatment Details:</em> ${trial.primTrt.join(", ")} <br>
-                    <em>Castration Details:</em> ${trial.castrate.join(", ")} <br>
-                    <em>Allowable Treatments:</em> ${trial.priorSysTher.join(", ")} <br>
-                    <em>Prohibited Treatments:</em> ${trial.prohibTrt.join(", ")} <br>
-                    <button onclick="deleteTrial(${index})">Delete</button>
-                `;
-                trialsList.appendChild(trialDiv);
-            });
+        
+        function displayTrials() {
+            const savedTrials = JSON.parse(localStorage.getItem("trials")) || [];
+            const list = document.getElementById("savedTrials");
+            list.innerHTML = savedTrials.length ? savedTrials.map(trial => `<li>${trial.name}: ${trial.description}</li>`).join("") : "<li>No trials saved.</li>";
         }
-
-        function deleteTrial(index) {
-            let trials = JSON.parse(localStorage.getItem("trials")) || [];
-            trials.splice(index, 1);
-            localStorage.setItem("trials", JSON.stringify(trials));
-            loadTrials();
-        }
+        
+        displayTrials();
     </script>
 </body>
 </html>
