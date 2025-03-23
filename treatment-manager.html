@@ -72,7 +72,7 @@
         window.onload = loadTreatments;
 
         function loadTrialsAndTreatments() {
-            const trials = JSON.parse(localStorage.getItem("trial")) || [];
+            const trials = JSON.parse(localStorage.getItem("trials")) || [];
             const treatments = JSON.parse(localStorage.getItem("customTreatments")) || [];
 
             const trialSelect = document.getElementById("trialSelect");
