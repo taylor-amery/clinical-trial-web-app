@@ -64,10 +64,10 @@
             treatmentList.innerHTML = treatments.map(t => `<span class="treatment">${t}</span>`).join(" ");
         }
         
-        function addRule() {
+        function addRule(type = "must", selectedTreatments = []) {
             const ruleDiv = document.createElement("div");
             ruleDiv.className = "rule";
-            
+        
             const ruleSelect = document.createElement("select");
             ruleSelect.innerHTML = `
                 <option value="must">MUST include</option>
@@ -75,37 +75,43 @@
                 <option value="at-least-one">AT LEAST ONE OF</option>
                 <option value="at-most-one">AT MOST ONE OF</option>
             `;
-            
+            ruleSelect.value = type;
+        
             const treatmentSelect = document.createElement("select");
             treatmentSelect.multiple = true;
-            treatmentSelect.innerHTML = treatments.map(t => `<option value="${t}">${t}</option>`).join(" ");
-            
+            treatmentSelect.innerHTML = treatments.map(t => 
+                `<option value="${t}" ${selectedTreatments.includes(t) ? "selected" : ""}>${t}</option>`
+            ).join(" ");
+        
             ruleDiv.appendChild(ruleSelect);
             ruleDiv.appendChild(treatmentSelect);
             document.getElementById("ruleList").appendChild(ruleDiv);
         }
-
+        
+        
         function saveTrial() {
             const trialName = document.getElementById("trialName").value.trim();
             const trialDescription = document.getElementById("trialDescription").value.trim();
             if (!trialName) return alert("Trial name is required");
-            
+        
             const rules = Array.from(document.querySelectorAll(".rule")).map(rule => {
                 return {
                     type: rule.children[0].value,
                     treatments: Array.from(rule.children[1].selectedOptions).map(option => option.value)
                 };
             });
-            
-            const trial = {
-                name: trialName,
-                description: trialDescription,
-                treatments: treatments,
-                rules: rules
-            };
-            
+        
             let trials = JSON.parse(localStorage.getItem("trials")) || [];
-            trials.push(trial);
+            const trialData = { name: trialName, description: trialDescription, treatments, rules };
+        
+            const index = document.getElementById("saveTrialButton").getAttribute("data-index");
+            if (index !== null) {
+                trials[parseInt(index)] = trialData;
+                document.getElementById("saveTrialButton").removeAttribute("data-index"); // Reset for next save
+            } else {
+                trials.push(trialData);
+            }
+        
             localStorage.setItem("trials", JSON.stringify(trials));
             displayTrials();
         }
@@ -113,10 +119,36 @@
         function displayTrials() {
             const savedTrials = JSON.parse(localStorage.getItem("trials")) || [];
             const list = document.getElementById("savedTrials");
-            list.innerHTML = savedTrials.length ? savedTrials.map(trial => `<li>${trial.name}: ${trial.description}</li>`).join("") : "<li>No trials saved.</li>";
+            list.innerHTML = savedTrials.length 
+                ? savedTrials.map((trial, index) => 
+                    `<li>
+                        <strong>${trial.name}</strong>: ${trial.description} 
+                        <button onclick="editTrial(${index})">Edit</button>
+                    </li>`
+                  ).join("")
+                : "<li>No trials saved.</li>";
         }
         
         displayTrials();
+        
+        function editTrial(index) {
+            const savedTrials = JSON.parse(localStorage.getItem("trials")) || [];
+            const trial = savedTrials[index];
+
+            document.getElementById("trialName").value = trial.name;
+            document.getElementById("trialDescription").value = trial.description;
+
+            treatments = trial.treatments || [];
+            updateTreatmentList();
+            
+            document.getElementById("ruleList").innerHTML = "";
+            trial.rules.forEach(rule => {
+                addRule(rule.type, rule.treatments);
+            });
+
+            document.getElementById("saveTrialButton").setAttribute("data-index", index);
+        }
+
     </script>
 </body>
 </html>
