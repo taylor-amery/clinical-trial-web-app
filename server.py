@@ -30,8 +30,11 @@ def fetch_trial_data(nct_id):
         print("Request failed:", e)
         return None
 
+@app.route('/')
+def home():
+    return "Welcome to my API"
 
-@app.route('/', methods=['GET'])
+@app.route('/get_trial', methods=['GET'])
 def get_trial():
     nct_number = request.args.get('nct')
     if not nct_number:
