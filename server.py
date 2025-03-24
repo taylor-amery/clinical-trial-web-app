@@ -31,7 +31,7 @@ def fetch_trial_data(nct_id):
         return None
 
 
-@app.route('/get_trial', methods=['GET'])
+@app.route('/ctgov-trial-fetch.html', methods=['GET'])
 def get_trial():
     nct_number = request.args.get('nct')
     if not nct_number:
