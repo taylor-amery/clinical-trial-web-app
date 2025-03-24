@@ -3,17 +3,16 @@ import requests
 
 app = Flask(__name__)
 
-# Function to fetch trial data from ClinicalTrials.gov
-def fetch_trial_data(nct_number):
-    url = f"https://clinicaltrials.gov/api/v2/studies/{nct_number}"
+def fetch_trial_data(nct_id):
+    url = f"https://clinicaltrials.gov/api/v2/studies/{nct_id}"
     response = requests.get(url)
-    
+    print("Status Code:", response.status_code)
+    print("Response Content:", response.text)
     if response.status_code == 200:
-        return response.json()  # Returns the JSON response
+        return response.json()
     else:
-        return {"error": f"Trial {nct_number} not found"}
+        return None
 
-# API Endpoint to get trial data
 @app.route('/get_trial', methods=['GET'])
 def get_trial():
     nct_number = request.args.get('nct')
