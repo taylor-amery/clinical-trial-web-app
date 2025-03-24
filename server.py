@@ -3,6 +3,7 @@ from flask_cors import CORS
 import requests
 
 app = Flask(__name__)
+CORS(app)
 import requests
 
 def fetch_trial_data(nct_id):
