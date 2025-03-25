@@ -34,23 +34,30 @@
 
             try {
                 const response = await fetch(`https://clinical-trial-web-app.onrender.com/get_trial?nct=${nctNumber}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
                 const data = await response.json();
+
+                // Display full JSON response
                 document.getElementById("trialData").textContent = JSON.stringify(data, null, 2);
-            } then (data => {
+
                 // Extract specific fields
                 const trialData = {
-                  id: data.NCTId,
-                  title: data.BriefTitle,
-                  condition: data.Condition,
-                  eligibility: data.EligibilityCriteria
+                    id: data.NCTId,
+                    title: data.BriefTitle,
+                    condition: data.Condition,
+                    eligibility: data.EligibilityCriteria
                 };
-                
+
                 // Store in localStorage
                 localStorage.setItem('selectedTrial', JSON.stringify(trialData));
 
                 console.log('Trial data saved:', trialData);
-                })
-                .catch(error => console.error('Error fetching trial data:', error));
+            } catch (error) {
+                console.error('Error fetching trial data:', error);
+                document.getElementById("trialData").textContent = "Error fetching trial data.";
+            }
         }
     </script>
 </body>
