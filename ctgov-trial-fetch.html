@@ -38,10 +38,10 @@
         
                 // Extract relevant fields
                 const trialData = {
-                    id: data.NCTId,
-                    title: data.BriefTitle,
-                    condition: data.Condition,
-                    eligibility: data.EligibilityCriteria
+                    id: data.protocolSection.identificationModule.nctId,
+                    title: data.protocolSection.identificationModule.briefTitle,
+                    condition: data.protocolSection.condidtionsModule.conditions,
+                    eligibility: data.protocolSection.eligibilityModule.eligibilityCriteria
                 };
         
                 // Retrieve existing trials from localStorage
