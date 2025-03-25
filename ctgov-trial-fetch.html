@@ -35,7 +35,8 @@
             try {
                 const response = await fetch(`https://clinical-trial-web-app.onrender.com/get_trial?nct=${nctNumber}`);
                 const data = await response.json();
-                .then(data => {
+                document.getElementById("trialData").textContent = JSON.stringify(data, null, 2);
+            } then (data => {
                 // Extract specific fields
                 const trialData = {
                   id: data.NCTId,
@@ -43,14 +44,13 @@
                   condition: data.Condition,
                   eligibility: data.EligibilityCriteria
                 };
-
+                
                 // Store in localStorage
                 localStorage.setItem('selectedTrial', JSON.stringify(trialData));
 
                 console.log('Trial data saved:', trialData);
                 })
                 .catch(error => console.error('Error fetching trial data:', error));
-            }
         }
     </script>
 </body>
