@@ -44,10 +44,10 @@
 
                 // Extract specific fields
                 const trialData = {
-                    id: data.identificationModule.nctId,
-                    title: data.identificationModule.briefTitle,
-                    condition: data.conditionsModule.conditions,
-                    eligibility: data.eligibilityModule.eligibilityCriteria
+                    id: data.protocolSection.identificationModule.nctId,
+                    title: data.protocolSection.identificationModule.briefTitle,
+                    condition: data.protocolSection.conditionsModule.conditions,
+                    eligibility: data.protocolSection.eligibilityModule.eligibilityCriteria
                 };
 
                 // Store in localStorage
