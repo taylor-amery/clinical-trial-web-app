@@ -1,7 +1,93 @@
-const storedTrial = localStorage.getItem('selectedTrial');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Trial Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            text-align: center;
+        }
+        .container {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        h2 {
+            color: #333;
+        }
+        .trial-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .no-data {
+            color: red;
+            font-weight: bold;
+        }
+        button {
+            padding: 10px;
+            margin-top: 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .secondary {
+            background: #6c757d;
+        }
+        .secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
 
-if (storedTrial) {
-  const trialData = JSON.parse(storedTrial);
-  console.log('Retrieved trial:', trialData);
-  // Use trialData to populate the page
-}
+    <h2>Clinical Trial Details</h2>
+    <div class="container">
+        <div id="trialDetails" class="trial-info">
+            <p class="no-data">No trial data found. Please fetch a trial first.</p>
+        </div>
+        <button onclick="window.location.href='index.html'">Go Back</button>
+        <button class="secondary" onclick="clearTrialData()">Clear Stored Trial</button>
+    </div>
+
+    <script>
+        // Retrieve stored trial data from localStorage
+        const storedTrial = localStorage.getItem('selectedTrial');
+
+        if (storedTrial) {
+            const trialData = JSON.parse(storedTrial);
+            console.log('Retrieved trial:', trialData);
+
+            // Populate the page with trial data
+            document.getElementById("trialDetails").innerHTML = `
+                <h3>${trialData.title}</h3>
+                <p><strong>Trial ID:</strong> ${trialData.id}</p>
+                <p><strong>Condition:</strong> ${trialData.condition}</p>
+                <p><strong>Eligibility Criteria:</strong></p>
+                <pre>${trialData.eligibility}</pre>
+            `;
+        }
+
+        function clearTrialData() {
+            localStorage.removeItem('selectedTrial');
+            alert('Trial data cleared.');
+            window.location.reload();
+        }
+    </script>
+
+</body>
+</html>
