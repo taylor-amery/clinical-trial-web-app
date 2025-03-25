@@ -65,27 +65,27 @@
     </div>
 
     <script>
-        // Retrieve stored trial data from localStorage
-        const storedTrial = localStorage.getItem('selectedTrial');
-
-        if (storedTrial) {
-            const trialData = JSON.parse(storedTrial);
-            console.log('Retrieved trial:', trialData);
-
-            // Populate the page with trial data
-            document.getElementById("trialDetails").innerHTML = `
-                <h3>${trialData.title}</h3>
-                <p><strong>Trial ID:</strong> ${trialData.id}</p>
-                <p><strong>Condition:</strong> ${trialData.condition}</p>
-                <p><strong>Eligibility Criteria:</strong></p>
-                <pre>${trialData.eligibility}</pre>
-            `;
-        }
-
-        function clearTrialData() {
-            localStorage.removeItem('selectedTrial');
-            alert('Trial data cleared.');
-            window.location.reload();
+        const storedTrials = localStorage.getItem('selectedTrials');
+        
+        if (storedTrials) {
+            const trials = JSON.parse(storedTrials);
+            console.log('Retrieved trials:', trials);
+        
+            const trialContainer = document.getElementById('trialList');
+            trialContainer.innerHTML = '';
+        
+            trials.forEach(trial => {
+                const trialElement = document.createElement('div');
+                trialElement.innerHTML = `
+                    <h3>${trial.title} (${trial.id})</h3>
+                    <p><strong>Condition:</strong> ${trial.condition}</p>
+                    <p><strong>Eligibility:</strong> ${trial.eligibility}</p>
+                    <hr>
+                `;
+                trialContainer.appendChild(trialElement);
+            });
+        } else {
+            console.log('No trials found in localStorage.');
         }
     </script>
 
