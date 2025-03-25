@@ -1,0 +1,7 @@
+const storedTrial = localStorage.getItem('selectedTrial');
+
+if (storedTrial) {
+  const trialData = JSON.parse(storedTrial);
+  console.log('Retrieved trial:', trialData);
+  // Use trialData to populate the page
+}
