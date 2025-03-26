@@ -22,13 +22,6 @@
         h2 {
             color: #333;
         }
-        .trial-info {
-            margin-top: 10px;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
         .no-data {
             color: red;
             font-weight: bold;
@@ -94,7 +87,7 @@
             const trialContainer = document.getElementById('trialList');
             trialContainer.innerHTML = '';
         
-            trials.forEach(trial => {
+            trials.forEach((trial, index) => {
                 const trialElement = document.createElement('div');
                 trialElement.innerHTML = `
                     <div class="trial-title" onclick="toggleTrial(${index})">
