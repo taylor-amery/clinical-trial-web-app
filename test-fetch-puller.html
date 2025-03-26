@@ -53,7 +53,7 @@
         .trial-title { 
             font-weight: bold; 
             cursor: pointer; 
-            background: #007bff; 
+            background: #ADD8E6; 
             color: white; 
             padding: 10px; 
             border-radius: 5px; 
@@ -64,6 +64,10 @@
             border-top: 1px solid #ccc; 
             background: #f9f9f9; 
         }
+        .trial-container {
+            margin-bottom: 15px;
+        }
+
     </style>
 </head>
 <body>
@@ -89,6 +93,7 @@
         
             trials.forEach((trial, index) => {
                 const trialElement = document.createElement('div');
+                trialElement.classList.add('trial-container'); 
                 trialElement.innerHTML = `
                     <div class="trial-title" onclick="toggleTrial(${index})">
                         ${trial.title} ▼
