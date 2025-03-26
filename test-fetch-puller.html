@@ -79,7 +79,7 @@
                 trialElement.innerHTML = `
                     <h3>${trial.title} (${trial.id})</h3>
                     <p><strong>Condition:</strong> ${trial.condition}</p>
-                    <p><strong>Eligibility:</strong> ${trial.eligibility}</p>
+                    <p><strong>Eligibility:</strong> ${trial.eligibility.replace(/\n/g, "<br>")}</p>
                     <hr>
                 `;
                 trialContainer.appendChild(trialElement);
