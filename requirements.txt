@@ -1,3 +1,6 @@
 flask
 requests
 flask-cors
+scispacy
+spacy
+https://github.com/allenai/scispacy/releases/download/v0.5.5/en_core_sci_sm-0.5.5.tar.gz
