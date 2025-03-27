@@ -2,8 +2,18 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 
-# Load SciSpaCy model
-nlp = spacy.load("en_core_sci_sm")
+import spacy
+import subprocess
+
+# Ensure the model is available
+MODEL_NAME = "en_core_sci_sm"
+
+try:
+    nlp = spacy.load(MODEL_NAME)
+except OSError:
+    print(f"Downloading {MODEL_NAME} model...")
+    subprocess.run(["python", "-m", "spacy", "download", MODEL_NAME])
+    nlp = spacy.load(MODEL_NAME)
 
 app = Flask(__name__)
 CORS(app)
