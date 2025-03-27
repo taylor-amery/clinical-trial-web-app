@@ -2,51 +2,67 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 
+# Load SciSpaCy model
+nlp = spacy.load("en_core_sci_sm")
+
 app = Flask(__name__)
 CORS(app)
-import requests
 
 def fetch_trial_data(nct_id):
+    """Fetches trial data from ClinicalTrials.gov API and extracts eligibility criteria."""
     url = f"https://clinicaltrials.gov/api/v2/studies/{nct_id}"
     
     try:
         response = requests.get(url)
-        print("Status Code:", response.status_code)  # Debugging
-        
         if response.status_code != 200:
-            print("Error: Received non-200 status code")
             return None
         
-        # Print raw text response for debugging
-        print("Raw Response Text:", response.text)
+        data = response.json()
         
+        # Extract eligibility criteria if available
+        eligibility_text = None
         try:
-            data = response.json()
-            print("Parsed JSON:", data)  # Debugging
-            return data
-        except ValueError:
-            print("Error: Invalid JSON response from API")
-            return None
-        
+            eligibility_text = data["protocolSection"]["eligibilityModule"]["eligibilityCriteria"]
+        except KeyError:
+            eligibility_text = "Eligibility criteria not available."
+
+        return {
+            "nct_id": nct_id,
+            "eligibility": eligibility_text,
+            "prior_therapies": extract_prior_therapies(eligibility_text)
+        }
+    
     except requests.RequestException as e:
         print("Request failed:", e)
         return None
 
+def extract_prior_therapies(text):
+    """Extracts prior therapies using NLP from eligibility criteria."""
+    if not text:
+        return []
+    
+    doc = nlp(text)
+    therapies = [ent.text for ent in doc.ents if ent.label_ in ["TREATMENT", "CHEMICAL"]]
+    
+    return list(set(therapies))  # Remove duplicates
 @app.route('/')
 def home():
     return "Welcome to my API"
 
 @app.route('/get_trial', methods=['GET'])
 def get_trial():
+    """Fetches trial data, extracts eligibility criteria, and applies NLP."""
     nct_number = request.args.get('nct')
     if not nct_number:
         return jsonify({"error": "No NCT number provided"}), 400
     
-    data = fetch_trial_data(nct_number)
-    return jsonify(data)
-import os
+    trial_data = fetch_trial_data(nct_number)
+    if trial_data is None:
+        return jsonify({"error": "Trial not found"}), 404
+    
+    return jsonify(trial_data)
 
 if __name__ == "__main__":
+    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
