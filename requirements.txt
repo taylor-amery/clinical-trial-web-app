@@ -3,5 +3,4 @@ flask-cors
 requests
 scispacy
 spacy
-en_core_sci_sm
 gunicorn
