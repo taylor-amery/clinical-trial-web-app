@@ -3,17 +3,10 @@ from flask_cors import CORS
 import requests
 
 import spacy
-import subprocess
+from pathlib import Path
 
-# Ensure the model is available
-MODEL_NAME = "en_core_sci_sm"
-
-try:
-    nlp = spacy.load(MODEL_NAME)
-except OSError:
-    print(f"Downloading {MODEL_NAME} model...")
-    subprocess.run(["python", "-m", "spacy", "download", MODEL_NAME])
-    nlp = spacy.load(MODEL_NAME)
+model_path = Path(__file__).parent / "en_core_sci_sm"
+nlp = spacy.load(model_path)
 
 app = Flask(__name__)
 CORS(app)
