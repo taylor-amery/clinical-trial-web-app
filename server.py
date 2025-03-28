@@ -5,9 +5,7 @@ import requests
 import spacy
 import os
 
-model_path = os.path.join(os.path.dirname(__file__), "en_core_sci_sm")
-
-nlp = spacy.load(model_path)
+nlp = spacy.load("./en_core_sci_sm-0.5.4")
 
 app = Flask(__name__)
 CORS(app)
