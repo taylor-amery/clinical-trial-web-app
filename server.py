@@ -3,9 +3,10 @@ from flask_cors import CORS
 import requests
 
 import spacy
-from pathlib import Path
+import os
 
-model_path = Path(__file__).parent / "en_core_sci_sm"
+model_path = os.path.join(os.path.dirname(__file__), "en_core_sci_sm")
+
 nlp = spacy.load(model_path)
 
 app = Flask(__name__)
