@@ -5,3 +5,4 @@ spacy
 scispacy
 https://github.com/allenai/scispacy/archive/refs/tags/v0.5.4.tar.gz
 gunicorn
+nmslib==2.1.1
