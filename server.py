@@ -21,10 +21,10 @@ def fetch_trial_data(nct_id):
         
         data = response.json()
         
-        # Extract eligibility criteria if available
+        # Safely check for the existence of each nested key
         eligibility_text = None
         try:
-            eligibility_text = data.protocolSection.eligibilityModule.eligibilityCriteria
+            eligibility_text = data.get("protocolSection", {}).get("eligibilityModule", {}).get("eligibilityCriteria", "Eligibility criteria not available.")
         except KeyError:
             eligibility_text = "Eligibility criteria not available."
 
