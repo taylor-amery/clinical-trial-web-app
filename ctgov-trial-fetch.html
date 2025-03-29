@@ -35,6 +35,7 @@
             try {
                 const response = await fetch(`https://clinical-trial-web-app.onrender.com/get_trial?nct=${nctNumber}`);
                 const data = await response.json();
+                console.log(data);
         
                 // Extract relevant fields
                 const trialData = {
