@@ -24,7 +24,7 @@ def fetch_trial_data(nct_id):
         # Extract eligibility criteria if available
         eligibility_text = None
         try:
-            eligibility_text = data["protocolSection"]["eligibilityModule"]["eligibilityCriteria"]
+            eligibility_text = data.protocolSection.eligibilityModule.eligibilityCriteria
         except KeyError:
             eligibility_text = "Eligibility criteria not available."
 
