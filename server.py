@@ -30,7 +30,7 @@ def fetch_trial_data(nct_id):
 
         return {
             "nct_id": nct_id,
-            "title": data["protocolSection"]["identificationModule"]["briefTitle"]
+            "title": data["protocolSection"]["identificationModule"]["briefTitle"],
             "eligibility": eligibility_text,
             "prior_therapies": extract_prior_therapies(eligibility_text)
         }
