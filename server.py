@@ -27,12 +27,15 @@ def fetch_trial_data(nct_id):
             eligibility_text = data.get("protocolSection", {}).get("eligibilityModule", {}).get("eligibilityCriteria", "Eligibility criteria not available.")
         except KeyError:
             eligibility_text = "Eligibility criteria not available."
-
+        
+        required_therapies, excluded_therapies = extract_prior_therapies(eligibility_text)
+        
         return {
             "nct_id": nct_id,
             "title": data["protocolSection"]["identificationModule"]["briefTitle"],
             "eligibility": eligibility_text,
-            "prior_therapies": extract_prior_therapies(eligibility_text)
+            "required_therapies": required_therapies,
+            "excluded_therapies": excluded_therapies
         }
     
     except requests.RequestException as e:
