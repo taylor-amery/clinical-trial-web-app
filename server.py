@@ -5,7 +5,13 @@ import requests
 import spacy
 import os
 
-nlp = spacy.load("./en_ner_biolp13cg_md-0.5.4")
+nlp = None
+
+def get_nlp():
+    global nlp
+    if nlp is None:
+        nlp = spacy.load("./en_ner_biolp13cg_md-0.5.4")
+    return nlp
 
 app = Flask(__name__)
 CORS(app)
@@ -43,6 +49,8 @@ def fetch_trial_data(nct_id):
         return None
 
 def extract_prior_therapies(text):
+    nlp = get_nlp()
+    
     """Extracts required and excluded therapies from eligibility criteria text using NLP."""
     if not text:
         return [], []
